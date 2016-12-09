@@ -12,18 +12,34 @@
 	  stroke: #000;
 	  shape-rendering: crispEdges;
 	}
+
+div#container1 {
+  height: 800px;
+  width: 900px;
+  border:2px solid #000;
+  overflow: scroll;
+ }
+svg#svg {
+  height: 100px;
+  width: 1100px;
+  border:1px dotted #ccc;
+  background-color: #ccc;
+}
 	</style>
 </head>
 
 <body>
 <b>Bar Chart : Brand Distribution</b>
 <p>X-axis : Brand<br>Y-axis : # of Pictures taken<br></p>
+
+</body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 
 <script>
-var margin = {top: 0, right: 20, bottom: 70, left: 60},
-    width = 5500 - margin.left - margin.right,
-    height = 550 - margin.top - margin.bottom;
+
+var margin = {top: 30, right: 20, bottom: 150, left: 60},
+    width = 6000 - margin.left - margin.right,
+    height = 700 - margin.top - margin.bottom;
 var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
 var y = d3.scale.linear().range([height, 0]);
 var xAxis = d3.svg.axis()
@@ -33,7 +49,10 @@ var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left")
     .ticks(10);
-var svg = d3.select("body").append("svg")
+var container1 = d3.select('body').append('div')
+    .attr('id','container1')
+    
+var svg = container1.append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
@@ -76,4 +95,3 @@ d3.csv("BrandCount.csv", function(error, data) {
 });
 </script>
 
-</body>
