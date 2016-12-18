@@ -12,18 +12,84 @@
 	  stroke: #000;
 	  shape-rendering: crispEdges;
 	}
+  .bar {
+  fill: orange;
+}
+
+.bar:hover {
+  fill: orangered ;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
 
 div#container1 {
-  height: 800px;
+  height: 600px;
   width: 900px;
   border:2px solid #000;
   overflow: scroll;
  }
+
 svg#svg {
+  display: block;
+  margin-top: -1200px;
+  float: top;
   height: 100px;
   width: 1100px;
   border:1px dotted #ccc;
   background-color: #ccc;
+}
+
+#xaxis {
+  float: left;
+  font-size: 13px;
+  color: #424242;
+  font-family: 'Open Sans regular', 'Open Sans';
+  width: 900;
+  direction: rtl;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 400px;
+  height: 400px;
+  padding: 8px;
+  font: 10px sans-serif;
+  background: #ddd;
+  border: solid 1px #aaa;
+  border-radius: 8px;
+  pointer-events: none;
 }
 	</style>
 </head>
@@ -31,17 +97,90 @@ svg#svg {
 <body>
 <b>Bar Chart : Brand Distribution</b>
 <p>X-axis : Brand<br>Y-axis : # of Pictures taken<br></p>
-
 </body>
+<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js?1.27.1"></script>
 <script src="http://d3js.org/d3.v3.min.js"></script>
+<script src = "functions.js"> </script> 
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script>
+        // var canvas  =d3.select(".fig1")
+        var min_year = 2020, max_year = -1, max_elem = 0;
+        d3.json("figure1_filt50.json", function(error, data){
+            render(data); 
+        })
+        
+        data = [];
+        cams = {}
+        
+        var fig1 = d3.select("#fig1");
+        var fig2 = d3.select("#fig2");
+        
+        function render(data){
+            preprocessing(data);
+          }
+
+    
+        var preprocessing = (function(data) {
+            var executed = false;
+            return function (data) {
+                
+                if (!executed) {
+                    executed = true;
+                    for (var i = 0; i < data.length; i++){
+                        var arr = data[i].mm.toLowerCase().split(';')
+                        
+                        var total = sumd(data[i]['year']);
+                        if(total > 50){
+                            if (!(arr[0] in cams)){
+                                cams[arr[0]] = {};
+                                cams[arr[0]]['count'] = total
+                                cams[arr[0]]['model'] = {}
+                            }
+                            else{
+                                cams[arr[0]]['count'] += total;
+                            }
+                            
+                            if(!(arr[1] in cams[arr[0]]['model'])){
+                                cams[arr[0]]['model'][arr[1]] = total;
+                            }
+                        } 
+
+                        var year = data[i].year;
+                        for (var j = 0; j < year.length; j++){
+                            
+                            var intyear = year[j]['x'];
+                            if(intyear > max_year && intyear < 2015)
+                                max_year=intyear;
+                            if(intyear < min_year && intyear > 1999)
+                                min_year = intyear;
+                            if(year[j]['y'] > max_elem)
+                                max_elem = year[j]['y'];
+                        }
+                    }
+                    for (var i = 0; i < data.length; i++){
+                        var year = data[i].year;
+                        for (var j = 0; j < year.length; j++){
+                            if(year[j]['x'] < min_year-1 || year[j]['x'] > max_year+1)
+                                year.splice(j,1)
+                        }
+                        if(year.length == 0)
+                            data.splice(i,1)
+                        data[i].year = sort_wrt_year(data[i].year);
+                    }
+                    this.data = data; 
+                }
+            };
+        })();
+ 
+    </script>
 
 <script>
 
-var margin = {top: 30, right: 20, bottom: 150, left: 60},
-    width = 6000 - margin.left - margin.right,
-    height = 700 - margin.top - margin.bottom;
-var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
-var y = d3.scale.linear().range([height, 0]);
+var margin = {top: 20, right: 20, bottom: 60, left: 170},
+    width = 700 - margin.left - margin.right,
+    height = 5800 - margin.top - margin.bottom;
+var x = d3.scale.linear().range([5, width]);
+var y = d3.scale.ordinal().rangeRoundBands([height, 0], .05);
 var xAxis = d3.svg.axis()
     .scale(x)
     .orient("bottom");
@@ -49,32 +188,57 @@ var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left")
     .ticks(10);
+
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<strong>Picture Count:</strong> <span style='color:red'>" + d.val + "</span>";
+  })
+
 var container1 = d3.select('body').append('div')
     .attr('id','container1')
-    
+
+var xAxisContainer = d3.select('body').append('div')
+    .attr('id','xaxis')  
+
 var svg = container1.append("svg")
     .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("height", height)
   .append("g")
     .attr("transform", 
           "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+var xaxis_svg = d3.select('#xaxis')
+  .append('svg')
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", margin.bottom)
+  .append('g')
+    .attr('transform', "translate(" + margin.left + "," + 0 +")");
+
+  
 d3.csv("BrandCount.csv", function(error, data) {
     data.forEach(function(d) {
         d.model = d.Brand;
         d.val = +d.Counts;
     });
+
+    data.sort(function(a, b) { return a.val - b.val; });
 	
-  x.domain(data.map(function(d) { return d.model; }));
-  y.domain([0, d3.max(data, function(d) { return d.val; })]);
-  svg.append("g")
+  y.domain(data.map(function(d) { return d.model; }));
+  x.domain([0, d3.max(data, function(d) { return d.val; })]);
+
+  xaxis_svg.append("g")
       .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
+      .attr("transform", "translate(0," + 0 + ")")
       .call(xAxis)
     .selectAll("text")
       .style("text-anchor", "end")
-      .attr("dx", "-.8em")
-      .attr("dy", "-.55em")
-      .attr("transform", "rotate(-90)" );
+      .attr("dx", ".60em")
+      .attr("dy", "-.50em")
+      .attr("transform", "rotate(90)" );
   svg.append("g")
       .attr("class", "y axis")
       .call(yAxis)
@@ -83,15 +247,124 @@ d3.csv("BrandCount.csv", function(error, data) {
       .attr("y", 6)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("Number of Pictures");
+      .text("Brands");
   svg.selectAll("bar")
       .data(data)
     .enter().append("rect")
-      .style("fill", "Orange")
-      .attr("x", function(d) { return x(d.model); })
-      .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(d.val); })
-      .attr("height", function(d) { return height - y(d.val); });
+      .attr("class", "bar")
+      .attr("x", 1)
+      .attr("width", function(d) { return x(d.val); }) 
+      .attr("y", function(d) { return y(d.model); })
+      .attr("height", y.rangeBand())
+      .on("mouseover", mouseover)
+      .on("mouseout", mouseout);
+    
 });
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 1e-6);
+
+
+
+
+function mouseover(name) {
+  var myname = name.model.toLowerCase();
+  var mymodels = cams[myname]['model'];
+
+  data = [];
+  for (var m in mymodels ) {
+    dc = {}
+    dc['model'] = m
+    dc['value'] = mymodels[m]
+    data.push(dc)
+  }
+
+  data.sort(function(a, b) { return a.value - b.value; });
+
+
+  var margin = {top: 20, right: 20, bottom: 60, left: 50}
+  var width = 400,
+    height = 400;
+
+  div.transition()
+      .duration(300)
+      .style("opacity", 1);
+  div.html("<h1>Models distribution</h1><br> <svg class='subgraph'></svg>")
+      .style("left", (d3.event.pageX - 12) + "px")
+      .style("top", (d3.event.pageY - 12) + "px");
+
+var x = d3.scale.linear()
+  .range([5, width])
+  .domain([0, d3.max(data, function(d) { return d.value; })]);
+
+var y = d3.scale.linear()
+  .range([15, height-margin.bottom])
+  .domain([15*data.length+10, 1])
+  // .domain(data.map(function(d) { return d.model; }));
+     
+// var y = d3.scale.ordinal().rangeRoundBands([height, 0], .05);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .ticks(10);
+
+
+
+ var svg = d3.select(".subgraph")
+     .attr("width", width)
+     .attr("height", height)
+
+   svg.append("g")
+        .attr("class", "x_axis")
+        .attr("transform", "translate(0," + (height-margin.bottom) + ")")
+        .call(xAxis)
+          .selectAll("text")
+            // .style("text-anchor", "end")
+            .attr("dx", margin.left)
+            .attr("dy", "-.10em")
+            .attr("transform", "rotate(90)" );
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+  //   .append("text")
+  //     .attr("transform", "rotate(-90)")
+  //     .attr("y", 6)
+  //     .attr("dy", ".71em")
+  //     .attr("dx",20)
+  //     .style("text-anchor", "end")
+  //     .text("Brands");
+  svg.selectAll("bar")
+      .data(data)
+      .enter().append("rect")
+        .attr("x", margin.left+3)
+        .attr("width", function(d) { return x(d.value); }) 
+        .attr("y", function(d,i) { return y(i*15+5); })
+        .attr("height", 10)
+  svg.selectAll("bar_text")
+    .data(data)
+    .enter()
+      .append('text')
+      .attr('class', 'bar_text')
+      .attr('text-anchor', 'middle')
+      .text(function(d){console.log(d.model);return d.model})
+      .attr('dy', function(d,i) { return y((i)*15);})
+      .attr('dx', 20)
+      .attr('fill', 'blue')
+  console.log(data.length)
+// });
+
+}
+
+function mouseout() {
+  div.transition()
+      .duration(300)
+      .style("opacity", 1e-6);
+}
+
 </script>
 
