@@ -286,8 +286,8 @@ function unhighlight_fig4_brands(make) {
 
 function highlight_figure(model, make)
 {
-    var t_fig1 = d3.select("#tooltip_fig1");
-    t_fig1.style("visibility", "visible");
+//    var t_fig1 = d3.select("#tooltip_fig1");
+//    t_fig1.style("visibility", "visible");
     d3.selectAll("#fig1_circle").style("stroke", function(d){
         return model.replace(/\s/g, '') === d.mm.split(';')[1].toLowerCase().replace(/\s/g, '') && make.replace(/\s/g, '') === d.mm.split(';')[0].toLowerCase().replace(/\s/g, '') ? "red":undefined
     })
@@ -299,21 +299,32 @@ function highlight_figure(model, make)
     })
     
     
-    d3.selectAll('.visline').style("stroke", function(d){
-        return model.replace(/\s/g, '') === d.mm.split(';')[1].toLowerCase().replace(/\s/g, '') && make.replace(/\s/g, '') === d.mm.split(';')[0].toLowerCase().replace(/\s/g, '') ? "#c51b8a":undefined  
-    }).style("stroke-width", function(d){
-        return model.replace(/\s/g, '') === d.mm.split(';')[1].toLowerCase().replace(/\s/g, '') && make.replace(/\s/g, '') === d.mm.split(';')[0].toLowerCase().replace(/\s/g, '') ? 5:1  
-    })
-    .style("opacity", function(d){
-        return model.replace(/\s/g, '') === d.mm.split(';')[1].toLowerCase().replace(/\s/g, '') && make.replace(/\s/g, '') === d.mm.split(';')[0].toLowerCase().replace(/\s/g, '') ? 0.9:0.3  
-    })
+//    d3.selectAll('.visline').style("stroke", function(d){
+//        return d.mm == make+';'+model ? fig_color(make):undefined  
+//    }).style("stroke-width", function(d){
+//        return d.mm == make+';'+model ? 5:1  
+//    })
+//    .style("opacity", function(d){
+//        return d.mm == make+';'+model ? 1:0.1  
+//    })
+//
+    
+    
+//    d3.selectAll('.visline').style("stroke", function(d){
+//        return model.replace(/\s/g, '') === d.mm.split(';')[1].toLowerCase().replace(/\s/g, '') && make.replace(/\s/g, '') === d.mm.split(';')[0].toLowerCase().replace(/\s/g, '') ? fig_color(d.mm.split(';')[0].toLowerCase()):undefined  
+//    }).style("stroke-width", function(d){
+//        return model.replace(/\s/g, '') === d.mm.split(';')[1].toLowerCase().replace(/\s/g, '') && make.replace(/\s/g, '') === d.mm.split(';')[0].toLowerCase().replace(/\s/g, '') ? 5:1  
+//    })
+//    .style("opacity", function(d){
+//        return model.replace(/\s/g, '') === d.mm.split(';')[1].toLowerCase().replace(/\s/g, '') && make.replace(/\s/g, '') === d.mm.split(';')[0].toLowerCase().replace(/\s/g, '') ? 0.9:norm;  
+//    })
     
     d3.selectAll("#fig3_path").style("opacity", function(d){
-        return d.name.toLowerCase() == make.replace(/\s/g, '') ? 1:0.7;
+        return d.name.toLowerCase() == make.replace(/\s/g, '') ? 1:unhov;
     })
     
     d3.selectAll("#fig2_bars").style("opacity", function(d){
-        return make.replace(/\s/g, '') == d.model.toLowerCase() ? 1:0.7; })
+        return make.replace(/\s/g, '') == d.model.toLowerCase() ? 1:unhov; })
     
     d3.select("svg#svg_fig4E").selectAll('circle').attr('r', function(d){
          return d.modelName.toLowerCase() === model && d.makeName.toLowerCase() === make ? 10 : (dict[d.makeName]==undefined ? 2:3)
@@ -344,7 +355,6 @@ function unhighlight_figure(model, make)
         .attr("r", 5)
         .style("stroke", undefined)
         .style("stroke-width", undefined)
-
     
     d3.selectAll("#fig3_path").style("opacity", 0.7)
     d3.selectAll("#fig2_bars").style("opacity", 0.7)
