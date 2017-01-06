@@ -1,5 +1,5 @@
-# Image-Exif-Project---6
-Image Exif Project - 6
+# Image-Exif-Data-Analysis-&-Visualization
+Group - 6
 
 Samet Taspinar,
 Piyush Chaudhary,
