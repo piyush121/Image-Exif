@@ -29,3 +29,7 @@ svgs, axis information, tooltips, and other visualization elements can be found 
 The video presentation of the project can be found: https://youtu.be/EVPqch65aCI
 
 The final report is: https://github.com/NYU-CS6313-Fall16/Image-Exif-Project-6/blob/master/IV_Image_Exif_Project_6_final_report.pdf
+
+Overall working :
+
+![alt tag](http://i.giphy.com/l4JzfpPIojUbQdAHe.gif)
